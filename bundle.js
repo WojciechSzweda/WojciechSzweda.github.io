@@ -11871,9 +11871,13 @@ function updateLink (link, options, obj) {
 
 
 
+const colors = [0xff0000, 0x00ff00, 0x8080ff, 0xffff00, 0x00ffff, 0xff00ff, 0xff8800, 0xff0088, 0x0088ff, 0x00ff88, 0x88ff00, 0x8800ff]
+
 class Graph {
 
     constructor(vertexCount, options) {
+        this.radius = 0.18
+        this.edgeLength = 1.3
         this.mat = Array.from(Array(vertexCount).keys())
             .map(y => Array(vertexCount).fill(0))
         this.edgeObjects = []
@@ -11883,7 +11887,13 @@ class Graph {
                 this.createTable(options.buttonName)
             if (options.color)
                 this.color = options.color
+            if (options.radius)
+                this.radius = options.radius
+            if (options.length)
+                this.edgeLength = options.length
         }
+
+
     }
 
     createTable(buttonName) {
@@ -11921,10 +11931,10 @@ class Graph {
     spawn() {
         let index = 0
         this.vertices = []
-        for (let i = 0; i < Math.PI * 2; i += Math.PI * 2 / this.mat.length) {
+        for (let i = 0; i < (Math.PI * 2).toFixed(6); i += Math.PI * 2 / this.mat.length) {
             const x = (Math.sin(i) * 1.3) + 0
             const y = (Math.cos(i) * 1.3) + 0
-            this.vertices.push(new __WEBPACK_IMPORTED_MODULE_0__worldElements__["a" /* Circle */]([x, y], 0.14, this.color, { index: ++index }))
+            this.vertices.push(new __WEBPACK_IMPORTED_MODULE_0__worldElements__["a" /* Circle */]([x, y], this.radius, this.color, { index: ++index }))
         }
         this.createEdges(this.vertices)
     }
@@ -11953,7 +11963,7 @@ class Graph {
 
     createEdges(vertices) {
         for (const [a, b] of this.edges()) {
-            this.edgeObjects.push(new __WEBPACK_IMPORTED_MODULE_0__worldElements__["b" /* JointLine */]([vertices[a].body, vertices[b].body], 2, 0.1, 1, 0.01, 0xffffff))
+            this.edgeObjects.push(new __WEBPACK_IMPORTED_MODULE_0__worldElements__["b" /* JointLine */]([vertices[a].body, vertices[b].body], 2, 0.1, this.edgeLength, 0.01, 0xffffff))
         }
     }
 
@@ -11972,6 +11982,10 @@ class Graph {
             .map(([x, index]) => index)
     }
 
+    areNeighbours(a, b) {
+        return this.neighbours(a).includes(b)
+    }
+
     edges() {
         const result = []
         for (let i = 0; i < this.mat.length; i++) {
@@ -11980,6 +11994,30 @@ class Graph {
             }
         }
         return result
+    }
+
+    coloring() {
+        let vertices = Array.from(Array(this.mat.length).keys()).sort((a, b) => this.neighbours(a).length - this.neighbours(b).length)
+        let colorIndex = 0
+        let $inner = layer => {
+            let lastColored = []
+            for (let i = vertices.length - 1; i >= 0; i--) {
+                let toColor = true
+                for (const col of lastColored) {
+                    if (this.areNeighbours(col, vertices[i]))
+                        toColor = false
+                }
+                if (toColor) {
+                    this.vertices[vertices[i]].colorVertex(colors[colorIndex])
+                    lastColored.push(vertices[i])
+                    vertices.splice(i, 1)
+                }
+            }
+            colorIndex++
+            if (vertices.length > 0)
+                $inner(vertices)
+        }
+        $inner(vertices)
     }
 
     //Depth-first search
@@ -12087,9 +12125,10 @@ class Circle extends WorldElement {
         this.text.scale.set(this.text.scale.x, this.text.scale.y * -1)
         WorldElement.container.addChild(this.text)
 
-        this.graphic.beginFill(color)
+        this.graphic.beginFill(0xffffff)
         this.graphic.drawCircle(0, 0, 1.2 * radius)
         this.graphic.endFill()
+        this.graphic.tint = this.color
     }
 
     display() {
@@ -12098,6 +12137,10 @@ class Circle extends WorldElement {
         this.graphic.position.x = pos.x
         this.graphic.position.y = pos.y
         this.text.position.set(pos.x, pos.y)
+    }
+
+    colorVertex(color){
+        this.graphic.tint = color
     }
 
     destroy() {
@@ -42629,6 +42672,7 @@ class GraphTable {
     createRefreshButton(){
         let t = document.createTextNode("Refresh graph")
         let button = document.createElement('button')
+        button.setAttribute("class", "btn btn-warning")
         button.onclick = () => this.updateGraph()
         button.appendChild(t)
         this.container.appendChild(button)
@@ -42637,7 +42681,6 @@ class GraphTable {
         if (this.hot != null) {
             return
         }
-        // document.getElementById(this.elementID).style.display = 'none'
         this.container = document.getElementById(this.elementID)
         this.hot = new __WEBPACK_IMPORTED_MODULE_0_handsontable_dist_handsontable_full_js___default.a(this.container, {
             data: this.data,
@@ -99334,18 +99377,25 @@ let mouseJoint = null
 
 function spawnGraph() {
     destroyGraphs()
-    const vertices = parseInt(document.getElementById('inputGraphVertices').value)
-    const prob = parseFloat(document.getElementById('inputGraphProb').value)
-    let graph = __WEBPACK_IMPORTED_MODULE_7__graph__["a" /* Graph */].random(vertices, prob, { createTable: true, buttonName: 'buttonShowHideTable', color: 0xff0000 })
+    const vertices = parseInt($('#inputGraphVertices').val())
+    const prob = parseFloat($('#inputGraphProb').val())
+    const radius = parseFloat($('#inputGraphRadius').val())
+    const length = parseFloat($('#inputGraphLength').val())
+    let graph = __WEBPACK_IMPORTED_MODULE_7__graph__["a" /* Graph */].random(vertices, prob, { createTable: true, buttonName: 'buttonShowHideTable', color: 0xff0000, radius: radius, length: length })
     graphs.push(graph)
     graphs.forEach(g => g.spawn())
     $('#buttonDFScreate').attr('disabled', false)
     $('#buttonBFScreate').attr('disabled', false)
+    $('#buttonColoring').attr('disabled', false)
 }
 
 function destroyGraphs() {
     graphs.forEach(g => g.destroy())
     graphs = []
+
+    $('#buttonDFScreate').attr('disabled', true)
+    $('#buttonBFScreate').attr('disabled', true)
+    $('#buttonColoring').attr('disabled', true)
 }
 
 function spawnDFS(){
@@ -99365,6 +99415,7 @@ function spawnBFS(){
 function clearSearches(){
     $('#buttonDFScreate').attr('disabled', false)
     $('#buttonBFScreate').attr('disabled', false)
+    $('#buttonColoring').attr('disabled', false)
     graphs.splice(1).forEach(g => g.destroy())
 }
 
@@ -99376,6 +99427,10 @@ function removeWater(){
         particlesContainer.removeChild(particlesContainer.children[i])
 }
 
+function graphColoring(){
+    graphs[0].coloring()
+}
+
 function buttonsSetup() {
     __WEBPACK_IMPORTED_MODULE_5__htmlUtilis__["a" /* htmlUtilis */].setupButtonWithClick({ name: 'buttonSpawnGraph', action: spawnGraph })
     __WEBPACK_IMPORTED_MODULE_5__htmlUtilis__["a" /* htmlUtilis */].setupButtonWithClick({ name: 'buttonSpawnWater', action: spawnWater })
@@ -99384,6 +99439,7 @@ function buttonsSetup() {
     __WEBPACK_IMPORTED_MODULE_5__htmlUtilis__["a" /* htmlUtilis */].setupButtonWithClick({name: 'buttonDFScreate', action: spawnDFS})
     __WEBPACK_IMPORTED_MODULE_5__htmlUtilis__["a" /* htmlUtilis */].setupButtonWithClick({name: 'buttonBFScreate', action: spawnBFS})
     __WEBPACK_IMPORTED_MODULE_5__htmlUtilis__["a" /* htmlUtilis */].setupButtonWithClick({name: 'buttonGraphSearchClear', action: clearSearches})
+    __WEBPACK_IMPORTED_MODULE_5__htmlUtilis__["a" /* htmlUtilis */].setupButtonWithClick({name: 'buttonColoring', action: graphColoring})
     
 }
 
