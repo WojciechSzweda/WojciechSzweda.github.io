@@ -110430,7 +110430,11 @@ renderer.backgroundColor = 0x999999
 document.getElementById('canvas').appendChild(renderer.view)
 document.addEventListener('keydown', onKeyDown)
 document.addEventListener('mouseup', onMouseUp)
-document.addEventListener('deviceorientation', orientationHandle)
+if (window.DeviceOrientationEvent) {
+    window.addEventListener('deviceorientation', orientationHandle, false);  
+    __WEBPACK_IMPORTED_MODULE_6_jquery___default()('#graphIsConnected').text(`no orientation`)
+    
+}
 
 let g_groundBody = null
 let mouseJoint = null
@@ -110577,9 +110581,12 @@ function onKeyDown(key) {
 }
 
 function orientationHandle(event){
+    console.log('device orinetation')
+    console.log(event)
     __WEBPACK_IMPORTED_MODULE_6_jquery___default()('#graphIsConnected').text(`gamma: ${event.gamma} beta: ${event.beta}`)
     world.gravity.y = event.beta
-    wordl.gravity.x = event.gamma
+    world.gravity.x = event.gamma
+    __WEBPACK_IMPORTED_MODULE_6_jquery___default()('#gravity').text(`Gravity: ${world.gravity.x}, ${world.gravity.y}`)
 }
 
 
