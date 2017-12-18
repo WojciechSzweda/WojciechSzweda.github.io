@@ -110428,12 +110428,12 @@ renderer = PIXI.autoDetectRenderer(1000, 800)
 
 renderer.backgroundColor = 0x999999
 document.getElementById('canvas').appendChild(renderer.view)
-document.addEventListener('keydown', onKeyDown);
+document.addEventListener('keydown', onKeyDown)
 document.addEventListener('mouseup', onMouseUp)
+document.addEventListener('deviceorientation', orientationHandle)
 
 let g_groundBody = null
 let mouseJoint = null
-
 
 
 
@@ -110575,6 +110575,12 @@ function onKeyDown(key) {
         world.resetGravity()
     __WEBPACK_IMPORTED_MODULE_6_jquery___default()('#gravity').text(`Gravity: ${world.gravity.x}, ${world.gravity.y}`)
 }
+
+function orientationHandle(event){
+    world.gravity.y = event.beta
+    wordl.gravity.x = event.gamma
+}
+
 
 function getMousePosition(mouse) {
     const pos = mouse.data.getLocalPosition(mouse.target)
