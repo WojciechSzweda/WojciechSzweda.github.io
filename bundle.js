@@ -110367,6 +110367,7 @@ function initializeWorld(x,y){
     world.addToGravity = addToGravity
     world.multGravity = multGravity
     world.resetGravity = resetGravity
+    world.changeGravity = changeGravity
 }
 
 function addToGravity(x,y){
@@ -110384,6 +110385,12 @@ function multGravity(x,y){
 function resetGravity(){
     world.gravity.x = 0
     world.gravity.y = 0
+    world.SetGravity(world.gravity)
+}
+
+function changeGravity(x,y){
+    world.gravity.x = x
+    world.gravity.y = y
     world.SetGravity(world.gravity)
 }
 
@@ -110432,8 +110439,6 @@ document.addEventListener('keydown', onKeyDown)
 document.addEventListener('mouseup', onMouseUp)
 if (window.DeviceOrientationEvent) {
     window.addEventListener('deviceorientation', orientationHandle, false);  
-    __WEBPACK_IMPORTED_MODULE_6_jquery___default()('#graphIsConnected').text(`no orientation`)
-    
 }
 
 let g_groundBody = null
@@ -110581,11 +110586,11 @@ function onKeyDown(key) {
 }
 
 function orientationHandle(event){
-    console.log('device orinetation')
-    console.log(event)
-    __WEBPACK_IMPORTED_MODULE_6_jquery___default()('#graphIsConnected').text(`gamma: ${event.gamma} beta: ${event.beta}`)
     world.gravity.y = event.beta
     world.gravity.x = event.gamma
+    let x = Math.round(map(event.gamma,-90,90,-30,30))
+    let y = Math.round(map(event.beta,-90,90,-30,30))
+    world.changeGravity(x,y)
     __WEBPACK_IMPORTED_MODULE_6_jquery___default()('#gravity').text(`Gravity: ${world.gravity.x}, ${world.gravity.y}`)
 }
 
