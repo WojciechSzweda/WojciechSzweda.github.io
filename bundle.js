@@ -110577,6 +110577,7 @@ function onKeyDown(key) {
 }
 
 function orientationHandle(event){
+    __WEBPACK_IMPORTED_MODULE_6_jquery___default()('#graphIsConnected').text(`gamma: ${event.gamma} beta: ${event.beta}`)
     world.gravity.y = event.beta
     wordl.gravity.x = event.gamma
 }
