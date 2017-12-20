@@ -110739,6 +110739,7 @@ function spawnGraph() {
     __WEBPACK_IMPORTED_MODULE_0_jquery___default()('#buttonDFScreate').attr('disabled', false)
     __WEBPACK_IMPORTED_MODULE_0_jquery___default()('#buttonBFScreate').attr('disabled', false)
     __WEBPACK_IMPORTED_MODULE_0_jquery___default()('#buttonColoring').attr('disabled', false)
+    __WEBPACK_IMPORTED_MODULE_0_jquery___default()('#buttonShowHideTable').attr('disabled', false)
 }
 
 function destroyGraphs() {
@@ -110749,6 +110750,8 @@ function destroyGraphs() {
     __WEBPACK_IMPORTED_MODULE_0_jquery___default()('#buttonBFScreate').attr('disabled', true)
     __WEBPACK_IMPORTED_MODULE_0_jquery___default()('#buttonColoring').attr('disabled', true)
     __WEBPACK_IMPORTED_MODULE_0_jquery___default()('#buttonGraphSearchClear').attr('disabled', true)
+    __WEBPACK_IMPORTED_MODULE_0_jquery___default()('#buttonShowHideTable').attr('disabled', true)
+    
 }
 
 function spawnDFS(){
